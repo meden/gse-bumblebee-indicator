@@ -83,9 +83,6 @@ BumblebeeIndicator.prototype = {
         this.button.setName('bumblebee-indicator');
         this.button.setGIcon(this._unactiveIcon);
 
-        this.notificationSource = new Convenience.BumblebeeNotificationSource(this._unactiveIcon);
-        Main.messageTray.add(this.notificationSource);
-
         // TODO: Add menu to launch Bumblebee Application Settings
         //this.setMenu(new PopupMenu.PopupMenu(this.actor, menuAlignment, St.Side.TOP, 0));
         //let item = new PopupMenu.PopupMenuItem(_("Show Overview"));
@@ -120,11 +117,14 @@ BumblebeeIndicator.prototype = {
     _notifyStatus: function(title, msg, icon) {
 
         let stIcon = new St.Icon({gicon: icon, icon_size: MessageTray.NOTIFICATION_ICON_SIZE});
-        let notification = new MessageTray.Notification(this.notificationSource,
-                                                        title, msg, {icon: stIcon});
 
-        this.notificationSource.notify(notification);
-        notification.acknowledged = true;
+        let notificationSource = new MessageTray.SystemNotificationSource();
+        Main.messageTray.add(notificationSource);
+
+        let notification = new MessageTray.Notification(notificationSource,
+                                                        title, msg, {icon: stIcon});
+        notification.setTransient(true);
+        notificationSource.notify(notification);
     },
 
     destroy: function() {

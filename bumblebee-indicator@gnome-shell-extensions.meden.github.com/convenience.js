@@ -54,24 +54,3 @@ Config.prototype = {
 
 }
 
-
-function BumblebeeNotificationSource(icon) {
-    MessageTray.Source.prototype._init('Bumblebee Indicator', icon);
-
-    this.isTransient      = true;
-    this.showInLockScreen = false;
-}
-
-BumblebeeNotificationSource.prototype = {
-    __proto__: MessageTray.Source.prototype,
-
-    createIcon: function(size) {
-        return new St.Icon({ gicon: this.iconName,
-                             icon_size: size });
-    },
-
-    open: function() {
-        this.destroy();
-    }
-
-}
