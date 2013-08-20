@@ -4,5 +4,5 @@
     "name": "Bumblebee Indicator",
     "description": "A Gnome Shell extension that indicates your Nvidia card status while using Bumblebee",
     "url": "https://github.com/meden/gse-bumblebee-indicator.git",
-    "version": 2
+    "version": 4
 }
