@@ -32,6 +32,7 @@ const PopupMenu = imports.ui.popupMenu;
 const PanelMenu = imports.ui.panelMenu;
 const MessageTray = imports.ui.messageTray;
 
+const Config = imports.misc.config;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Local = ExtensionUtils.getCurrentExtension();
 const Convenience = Local.imports.convenience;
@@ -75,6 +76,8 @@ BumblebeeIndicator.prototype = {
         this._activeIcon    = Gio.Icon.new_for_string(this.extensionMeta.path + '/images/bumblebee-indicator-active.svg');
         this._unactiveIcon  = Gio.Icon.new_for_string(this.extensionMeta.path + '/images/bumblebee-indicator.svg');
 
+        this._useOldNotificationIcon = this._checkUseOldNotificationIcon();
+
         this._lockFile      = '/tmp/.X' + this.config.virtualDisplay + '-lock';
         this._lockMonitor   = Gio.File.new_for_path(this._lockFile).monitor_file(Gio.FileMonitorFlags.NONE, null);
         this._lockMonitor.id = this._lockMonitor.connect('changed', Lang.bind(this, this._statusChanged));
@@ -91,6 +94,15 @@ BumblebeeIndicator.prototype = {
         // Notification system initialization
         //Notify.init('Bumblebee Indicator');
 
+    },
+
+    _checkUseOldNotificationIcon: function() {
+        let currentArray = Config.PACKAGE_VERSION.split('.');
+        if (currentArray[1] < 8) {
+            return true;
+        } else {
+            return false;
+        }
     },
 
     _statusChanged: function(monitor, a_file, other_file, event_type) {
@@ -115,14 +127,20 @@ BumblebeeIndicator.prototype = {
     },
 
     _notifyStatus: function(title, msg, icon) {
-
-        let stIcon = new St.Icon({gicon: icon, icon_size: MessageTray.NOTIFICATION_ICON_SIZE});
-
         let notificationSource = new MessageTray.SystemNotificationSource();
         Main.messageTray.add(notificationSource);
 
-        let notification = new MessageTray.Notification(notificationSource,
+        let notification = null;
+        if (this._useOldNotificationIcon) {
+            let stIcon = new St.Icon({gicon: icon,
+                                      icon_size: MessageTray.NOTIFICATION_ICON_SIZE});
+            notification = new MessageTray.Notification(notificationSource,
                                                         title, msg, {icon: stIcon});
+        } else {
+            notification = new MessageTray.Notification(notificationSource,
+                                                        title, msg, {gicon: icon});
+        }
+
         notification.setTransient(true);
         notificationSource.notify(notification);
     },
